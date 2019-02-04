@@ -71,7 +71,7 @@ public class ChessGui extends JFrame {
 	 * Create the frame.
 	 */
 	public ChessGui() {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(ChessGui.class.getResource("/chess/images/WhitePawn.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(ChessGui.class.getResource("images/WhitePawn.png")));
 		setTitle("Chess");
 		setFocusable(false);
 		setVisible(true);
@@ -379,7 +379,7 @@ public class ChessGui extends JFrame {
 		// selected piece can move
 		int turnColor = turn.equals(Colour.WHITE) ? 7 : 0;
 		while(i < currMoveOptions.size()) {
-			moveOptions.add(new JLabel(new ImageIcon("src/chess/images/MoveMarker.png")));
+			moveOptions.add(new JLabel(new ImageIcon(ChessGui.class.getResource("images/MoveMarker.png"))));
 			moveOptions.get(i).setBounds((currMoveOptions.get(i).getX() * buttonSize + (int)(Math.round(buttonSize * 0.4))), 
 					(Math.abs(turnColor - currMoveOptions.get(i).getY()) * buttonSize + (int)(Math.round(buttonSize * 0.4))), 
 					(int)(Math.round(buttonSize * 0.2)), (int)(Math.round(buttonSize * 0.2)));

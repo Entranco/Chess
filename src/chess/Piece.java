@@ -24,7 +24,8 @@ public abstract class Piece {
 		this.location = location;
 		this.colour = colour;
 		hasMoved = false;
-		icon = new ImageIcon(("src/chess/images/" + colour.toString() + getClass().getSimpleName() + ".png"));
+		icon = new ImageIcon((Piece.class.getResource("images/" + colour.toString() 
+			+ getClass().getSimpleName() + ".png")));
 	}
 	
 	/**
