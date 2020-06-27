@@ -18,11 +18,13 @@ public abstract class Piece {
 	public Coordinate location;
 	public final Colour colour;
 	public final Icon icon;
+	public final ChessGui engine;
 	public boolean hasMoved;
 	
-	public Piece(Coordinate location, Colour colour) {
+	public Piece(Coordinate location, Colour colour, ChessGui engine) {
 		this.location = location;
 		this.colour = colour;
+		this.engine = engine;
 		hasMoved = false;
 		icon = new ImageIcon((Piece.class.getResource("images/" + colour.toString() 
 			+ getClass().getSimpleName() + ".png")));
@@ -91,7 +93,7 @@ public abstract class Piece {
 	
 	public void verifyColours(ArrayList<Coordinate> coors) {
 		ArrayList<Coordinate> removedCoors = new ArrayList<>();
-		HashMap<Coordinate, Piece> map = ChessGui.getMap();
+		HashMap<Coordinate, Piece> map = engine.getMap();
 		for(Coordinate el: coors) {
 			Piece currPiece = map.get(el);
 			if(currPiece != null && currPiece.colour.equals(colour))
@@ -103,7 +105,7 @@ public abstract class Piece {
 	}
 	
 	protected boolean isBlocked(int x, int y) {
-		Piece destinationPiece = ChessGui.getMap().get(new Coordinate(x, y));
+		Piece destinationPiece = engine.getMap().get(new Coordinate(x, y));
 		if((destinationPiece != null && destinationPiece.getColour() == this.colour)  || x > 7 || x < 0 || y > 7 || y < 0)
 			return true;
 		return false;
@@ -111,7 +113,7 @@ public abstract class Piece {
 	
 	protected ArrayList<Coordinate> movePaths(int xMod, int yMod) {
 		ArrayList<Coordinate> localCoors = new ArrayList<Coordinate>();
-		HashMap<Coordinate, Piece> map = ChessGui.getMap();
+		HashMap<Coordinate, Piece> map = engine.getMap();
 		Coordinate testCoor = new Coordinate(location.getX(), location.getY());
 		while(!isBlocked(testCoor.getX() + xMod, testCoor.getY() + yMod)) {
 			testCoor.setX(testCoor.getX() + xMod);

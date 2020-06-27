@@ -16,8 +16,8 @@ public class Pawn extends Piece {
 	 * @param location The location of the pawn to be created
 	 * @param colour The colour of the pawn to be created
 	 */
-	public Pawn(Coordinate location, Colour colour) {
-		super(location, colour);
+	public Pawn(Coordinate location, Colour colour, ChessGui engine) {
+		super(location, colour, engine);
 	}
 
 	
@@ -73,7 +73,7 @@ public class Pawn extends Piece {
 	private boolean isMoveBlocked(int x, int y) {
 		x += location.getX();
 		y += location.getY();
-		Piece destinationPiece = ChessGui.getMap().get(new Coordinate(x, y));
+		Piece destinationPiece = engine.getMap().get(new Coordinate(x, y));
 		if(destinationPiece != null  || x > 7 || x < 0 || y > 7 || y < 0)
 			return true;
 		return false;
@@ -89,8 +89,8 @@ public class Pawn extends Piece {
 	private boolean canCapture(int x, int y) {
 		x += location.getX();
 		y += location.getY();
-		Piece destinationPiece = ChessGui.getMap().get(new Coordinate(x, y));
-		boolean enPass = new Coordinate(x, y).equals(ChessGui.getEnPassant());
+		Piece destinationPiece = engine.getMap().get(new Coordinate(x, y));
+		boolean enPass = new Coordinate(x, y).equals(engine.getEnPassant());
 		if(destinationPiece != null || enPass) {
 			return true;
 		}
