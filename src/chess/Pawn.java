@@ -17,7 +17,7 @@ public class Pawn extends Piece {
 	 * @param colour The colour of the pawn to be created
 	 */
 	public Pawn(Coordinate location, Colour colour, ChessGui engine) {
-		super(location, colour, engine);
+		super(location, colour, engine, 1);
 	}
 
 	

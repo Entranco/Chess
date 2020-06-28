@@ -17,7 +17,7 @@ public class Rook extends Piece {
 	 * @param colour The colour of the rook to be created
 	 */
 	public Rook(Coordinate location, Colour colour, ChessGui engine) {
-		super(location, colour, engine);
+		super(location, colour, engine, 5);
 	}
 
 	@Override

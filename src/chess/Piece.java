@@ -15,18 +15,23 @@ import javax.swing.ImageIcon;
  * 
  ****************************************************************************************************/
 public abstract class Piece {
+	
 	public Coordinate location;
-	public final Colour colour;
-	public final Icon icon;
-	public final ChessGui engine;
 	public boolean hasMoved;
 	
-	public Piece(Coordinate location, Colour colour, ChessGui engine) {
+	public final Colour colour;
+	public final Icon icon;
+	public final int pointValue;
+	public final ChessGui engine;
+	
+	
+	public Piece(Coordinate location, Colour colour, ChessGui engine, int pointValue) {
 		this.location = location;
 		this.colour = colour;
 		this.engine = engine;
+		this.pointValue = pointValue;
 		hasMoved = false;
-		icon = new ImageIcon((Piece.class.getResource("images/" + colour.toString() 
+		icon = new ImageIcon((Piece.class.getResource("images/" + colour.toString()
 			+ getClass().getSimpleName() + ".png")));
 	}
 	
@@ -106,8 +111,9 @@ public abstract class Piece {
 	}
 	
 	protected boolean isBlocked(int x, int y) {
-		Piece destinationPiece = engine.getMap().get(new Coordinate(x, y));
-		if((destinationPiece != null && destinationPiece.getColour() == this.colour)  || x > 7 || x < 0 || y > 7 || y < 0)
+		//Piece destinationPiece = engine.getMap().get(new Coordinate(x, y));
+		// (destinationPiece != null && destinationPiece.getColour() == this.colour)
+		if(x > 7 || x < 0 || y > 7 || y < 0)
 			return true;
 		return false;
 	}

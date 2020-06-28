@@ -120,7 +120,7 @@ public class ChessGui extends JFrame {
 			}
 			
 			p1Colour = colorValue == 0 ? Colour.WHITE : Colour.BLACK;
-			ai = new GarboAI(this, colorValue == 0 ? Colour.BLACK : Colour.WHITE);
+			ai = new GoodTradesAI(this, colorValue == 0 ? Colour.BLACK : Colour.WHITE);
 		}
 
 		// starts the game by launching the GUI and waiting for the user to act
@@ -418,9 +418,9 @@ public class ChessGui extends JFrame {
 	 * @param coor The coordinate to check for being threatened
 	 * @return True if the passed coordinate is threatened, false if not
 	 */
-	public boolean isCoorThreatened(Coordinate coor) {
+	public boolean isCoorThreatened(Coordinate coor, Colour allyColour) {
 		for (Piece piece : pieces) {
-			if (!piece.getColour().equals(turn)) {
+			if (!piece.getColour().equals(allyColour)) {
 				for (Coordinate el : piece.canThreaten()) {
 					if (el.equals(coor)) {
 						return true;
@@ -505,7 +505,7 @@ public class ChessGui extends JFrame {
 			// emulates the piece moving to each move option
 			oldPiece = emulateMove(currPiece, moveOption);
 			// removes the move option from the list of current move options
-			if (isCoorThreatened(getCurrKing().getLocation())) {
+			if (isCoorThreatened(getCurrKing().getLocation(), turn)) {
 				coorsToRemove.add(moveOption);
 			}
 
@@ -810,7 +810,7 @@ public class ChessGui extends JFrame {
 	 * @return True if the current king is in check, false if it is not
 	 */
 	private boolean checkForCheck() {
-		return isCoorThreatened(getCurrKing().getLocation());
+		return isCoorThreatened(getCurrKing().getLocation(), turn);
 	}
 
 	/**

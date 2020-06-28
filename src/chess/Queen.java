@@ -17,7 +17,7 @@ public class Queen extends Piece {
 	 * @param colour The colour of the queen to be created
 	 */
 	public Queen(Coordinate location, Colour colour, ChessGui engine) {
-		super(location, colour, engine);
+		super(location, colour, engine, 9);
 	}
 
 	@Override

@@ -18,7 +18,7 @@ public class King extends Piece {
 	 * @param colour The colour of the king to be created
 	 */
 	public King(Coordinate location, Colour colour, ChessGui engine) {
-		super(location, colour, engine);
+		super(location, colour, engine, 0);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class King extends Piece {
 	
 	private boolean canLeftCastle() {
 		HashMap<Coordinate, Piece> map = engine.getMap();
-		if(engine.isCoorThreatened(location)) {
+		if(engine.isCoorThreatened(location, colour)) {
 			return false;
 		}
 		for(int i = location.getX() - 1; i > 0; i--) {
@@ -60,7 +60,7 @@ public class King extends Piece {
 			if(map.get(currCoor) != null) {
 				return false;
 			}
-			if(engine.isCoorThreatened(currCoor)) {
+			if(engine.isCoorThreatened(currCoor, colour)) {
 				return false;
 			}
 		}
@@ -73,7 +73,7 @@ public class King extends Piece {
 	
 	private boolean canRightCastle() {
 		HashMap<Coordinate, Piece> map = engine.getMap();
-		if(engine.isCoorThreatened(location)) {
+		if(engine.isCoorThreatened(location, colour)) {
 			return false;
 		}
 		for(int i = location.getX() + 1; i < 7; i++) {
@@ -81,7 +81,7 @@ public class King extends Piece {
 			if(map.get(currCoor) != null) {
 				return false;
 			}
-			if(engine.isCoorThreatened(currCoor)) {
+			if(engine.isCoorThreatened(currCoor, colour)) {
 				return false;
 			}
 		}

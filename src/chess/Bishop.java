@@ -17,7 +17,7 @@ public class Bishop extends Piece {
 	 * @param colour The colour of the bishop to be created
 	 */
 	public Bishop(Coordinate location, Colour colour, ChessGui engine) {
-		super(location, colour, engine);
+		super(location, colour, engine, 3);
 	}
 
 	@Override

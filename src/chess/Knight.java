@@ -17,7 +17,7 @@ public class Knight extends Piece {
 	 * @param colour The colour of the knight to be created
 	 */
 	public Knight(Coordinate location, Colour colour, ChessGui engine) {
-		super(location, colour, engine);
+		super(location, colour, engine, 3);
 	}
 
 	@Override
