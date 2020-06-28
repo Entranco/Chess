@@ -37,6 +37,7 @@ public abstract class Piece {
 	public ArrayList<Coordinate> canMove() {
 		ArrayList<Coordinate> coors = canThreaten();
 		verifyColours(coors);
+		engine.verifyMoveOptions(this, coors);
 		return coors;
 	}
 	

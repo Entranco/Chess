@@ -51,7 +51,10 @@ public class ChessGui extends JFrame {
 	private JLabel[] capturedLabels;
 	private int[][] piecesRemaining;
 	private Coordinate enPassant;
-	
+	private Colour p1Colour;
+	private boolean soloGame;
+	private ChessAI ai;
+
 	// Constants
 	private static final int buttonSize = 98;
 	private static boolean rotateScreen = false;
@@ -74,18 +77,62 @@ public class ChessGui extends JFrame {
 
 	/**
 	 * Create the frame.
+	 * @throws CloseGameException 
 	 */
-	public ChessGui() {
+	public ChessGui() throws CloseGameException {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ChessGui.class.getResource("images/WhitePawn.png")));
 		setTitle("Chess");
 		setFocusable(false);
 		setVisible(true);
+
+		// holds the options to either play again or close the program
+		String[] options = { "1", "2" };
+		// shows a new panel prompting the user to select a piece
+		JOptionPane playerPanel = new JOptionPane();
+		playerPanel.setBounds(100, 250, 200, 500);
+		@SuppressWarnings("static-access")
+		int returnValue = playerPanel.showOptionDialog(contentPane, "<html><br>How many players would like to play?</html>",
+				"How many players?", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, new ImageIcon(
+						ChessGui.class.getResource("images/WhiteKing.png")),
+				options, options[0]);
+
+		// assumes that the user wants to close the program if the prompt window is
+		// closed
+		if (returnValue == JOptionPane.CLOSED_OPTION) {
+			throw new CloseGameException();
+		}
+		
+		
+		soloGame = returnValue == 0;
+		if(returnValue == 0) {
+			JOptionPane colorPanel = new JOptionPane();
+			colorPanel.setBounds(100, 250, 200, 500);
+			Icon[] icons = new Icon[2];
+			icons[0] = new ImageIcon(ChessGui.class.getResource("images/WhitePawn.png"));
+			icons[1] = new ImageIcon(ChessGui.class.getResource("images/BlackPawn.png"));
+			
+			@SuppressWarnings("static-access")
+			int colorValue = colorPanel.showOptionDialog(contentPane, "What color will you play?", "Choose your color!",
+					JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, icons[0], icons, icons[0]);
+			
+			if (colorValue == JOptionPane.CLOSED_OPTION) {
+				colorValue = 0;
+			}
+			
+			p1Colour = colorValue == 0 ? Colour.WHITE : Colour.BLACK;
+			ai = new GarboAI(this, colorValue == 0 ? Colour.BLACK : Colour.WHITE);
+		}
 
 		// starts the game by launching the GUI and waiting for the user to act
 		generatePieces();
 		createContentPane();
 		createinfoPanel();
 		createBoardPanel();
+		
+		if(soloGame && p1Colour == Colour.BLACK) {
+			moveAIPiece();
+			rotateScreen();
+		}
 		createActionListeners();
 	}
 
@@ -99,23 +146,34 @@ public class ChessGui extends JFrame {
 		pieceHolder = null;
 		// creates an array of pieces containing all of the pieces that start in a game
 		// of chess
-		Piece[][] pieceArray = new Piece[][] {
-				{ new King(new Coordinate(4, 0), Colour.WHITE , this), new Queen(new Coordinate(3, 0), Colour.WHITE , this),
-						new Rook(new Coordinate(0, 0), Colour.WHITE , this), new Rook(new Coordinate(7, 0), Colour.WHITE , this),
-						new Knight(new Coordinate(1, 0), Colour.WHITE , this), new Knight(new Coordinate(6, 0), Colour.WHITE , this),
-						new Bishop(new Coordinate(2, 0), Colour.WHITE , this), new Bishop(new Coordinate(5, 0), Colour.WHITE , this),
-						new Pawn(new Coordinate(0, 1), Colour.WHITE , this), new Pawn(new Coordinate(1, 1), Colour.WHITE , this),
-						new Pawn(new Coordinate(2, 1), Colour.WHITE , this), new Pawn(new Coordinate(3, 1), Colour.WHITE , this),
-						new Pawn(new Coordinate(4, 1), Colour.WHITE , this), new Pawn(new Coordinate(5, 1), Colour.WHITE , this),
-						new Pawn(new Coordinate(6, 1), Colour.WHITE , this), new Pawn(new Coordinate(7, 1), Colour.WHITE , this) },
-				{ new King(new Coordinate(4, 7), Colour.BLACK, this), new Queen(new Coordinate(3, 7), Colour.BLACK, this),
-						new Rook(new Coordinate(0, 7), Colour.BLACK, this), new Rook(new Coordinate(7, 7), Colour.BLACK, this),
-						new Knight(new Coordinate(1, 7), Colour.BLACK, this), new Knight(new Coordinate(6, 7), Colour.BLACK, this),
-						new Bishop(new Coordinate(2, 7), Colour.BLACK, this), new Bishop(new Coordinate(5, 7), Colour.BLACK, this),
-						new Pawn(new Coordinate(0, 6), Colour.BLACK, this), new Pawn(new Coordinate(1, 6), Colour.BLACK, this),
-						new Pawn(new Coordinate(2, 6), Colour.BLACK, this), new Pawn(new Coordinate(3, 6), Colour.BLACK, this),
-						new Pawn(new Coordinate(4, 6), Colour.BLACK, this), new Pawn(new Coordinate(5, 6), Colour.BLACK, this),
-						new Pawn(new Coordinate(6, 6), Colour.BLACK, this), new Pawn(new Coordinate(7, 6), Colour.BLACK, this), } };
+		Piece[][] pieceArray = new Piece[][] { { new King(new Coordinate(4, 0), Colour.WHITE, this),
+				new Queen(new Coordinate(3, 0), Colour.WHITE, this), new Rook(new Coordinate(0, 0), Colour.WHITE, this),
+				new Rook(new Coordinate(7, 0), Colour.WHITE, this),
+				new Knight(new Coordinate(1, 0), Colour.WHITE, this),
+				new Knight(new Coordinate(6, 0), Colour.WHITE, this),
+				new Bishop(new Coordinate(2, 0), Colour.WHITE, this),
+				new Bishop(new Coordinate(5, 0), Colour.WHITE, this),
+				new Pawn(new Coordinate(0, 1), Colour.WHITE, this), new Pawn(new Coordinate(1, 1), Colour.WHITE, this),
+				new Pawn(new Coordinate(2, 1), Colour.WHITE, this), new Pawn(new Coordinate(3, 1), Colour.WHITE, this),
+				new Pawn(new Coordinate(4, 1), Colour.WHITE, this), new Pawn(new Coordinate(5, 1), Colour.WHITE, this),
+				new Pawn(new Coordinate(6, 1), Colour.WHITE, this),
+				new Pawn(new Coordinate(7, 1), Colour.WHITE, this) },
+				{ new King(new Coordinate(4, 7), Colour.BLACK, this),
+						new Queen(new Coordinate(3, 7), Colour.BLACK, this),
+						new Rook(new Coordinate(0, 7), Colour.BLACK, this),
+						new Rook(new Coordinate(7, 7), Colour.BLACK, this),
+						new Knight(new Coordinate(1, 7), Colour.BLACK, this),
+						new Knight(new Coordinate(6, 7), Colour.BLACK, this),
+						new Bishop(new Coordinate(2, 7), Colour.BLACK, this),
+						new Bishop(new Coordinate(5, 7), Colour.BLACK, this),
+						new Pawn(new Coordinate(0, 6), Colour.BLACK, this),
+						new Pawn(new Coordinate(1, 6), Colour.BLACK, this),
+						new Pawn(new Coordinate(2, 6), Colour.BLACK, this),
+						new Pawn(new Coordinate(3, 6), Colour.BLACK, this),
+						new Pawn(new Coordinate(4, 6), Colour.BLACK, this),
+						new Pawn(new Coordinate(5, 6), Colour.BLACK, this),
+						new Pawn(new Coordinate(6, 6), Colour.BLACK, this),
+						new Pawn(new Coordinate(7, 6), Colour.BLACK, this), } };
 		// holds the white and black kings as fields for easy access
 		whiteKing = pieceArray[0][0];
 		blackKing = pieceArray[1][0];
@@ -264,7 +322,10 @@ public class ChessGui extends JFrame {
 							for (Coordinate coor : currMoveOptions) {
 								// if the clicked button equals that coordinate, move the piece
 								if (buttonToCoor(button).equals(coor)) {
-									movePiece(coor, button);
+									movePiece(coor);
+									if(soloGame) {
+										moveAIPiece();
+									}
 									break;
 								}
 							}
@@ -306,7 +367,7 @@ public class ChessGui extends JFrame {
 	 * @return The Coordinate relating to the passed JButton
 	 */
 	private Coordinate buttonToCoor(JButton button) {
-		if (turn.equals(Colour.BLACK) && rotateScreen)
+		if ((turn.equals(Colour.BLACK) && rotateScreen) || soloGame && (p1Colour == Colour.BLACK))
 			return new Coordinate(button.getX() / buttonSize, button.getY() / buttonSize);
 		else
 			return new Coordinate(button.getX() / buttonSize, 7 - (button.getY() / buttonSize));
@@ -341,6 +402,14 @@ public class ChessGui extends JFrame {
 	public Coordinate getEnPassant() {
 		return enPassant;
 	}
+	
+	/**
+	 * Sets the current piece to be moved, used in allowing the AI to move.
+	 * @param piece
+	 */
+	public void setPieceHolder(Piece piece) {
+		pieceHolder = piece;
+	}
 
 	/**
 	 * Checks to see if the passed coordinate project is threatened by any enemy
@@ -370,7 +439,7 @@ public class ChessGui extends JFrame {
 	 *               moved to
 	 * @param button The button relating to the passed coordinate
 	 */
-	private void movePiece(Coordinate coor, JButton button) {
+	public void movePiece(Coordinate coor) {
 		// changes icons and map
 		buttons[pieceHolder.getLocation().getX()][pieceHolder.getLocation().getY()].setIcon(null);
 		changeCapturedLabels(map.get(coor), -1);
@@ -385,7 +454,7 @@ public class ChessGui extends JFrame {
 
 		// changes location of piece and icon of destination
 		pieceHolder.setLocation(coor);
-		button.setIcon(pieceHolder.getIcon());
+		buttons[coor.getX()][coor.getY()].setIcon(pieceHolder.getIcon());
 		pieceHolder.setHasMoved(true);
 		// checks for promotions, swaps the turn, and checks for checkmate and stalemate
 		checkForPromotion();
@@ -403,11 +472,10 @@ public class ChessGui extends JFrame {
 		// gets the current move options and verifies that none of them put the king in
 		// check
 		currMoveOptions = (ArrayList<Coordinate>) pieceHolder.canMove().clone();
-		verifyMoveOptions(currMoveOptions);
 		// adds icons for each legal move option on the board to show where the
 		// currently
 		// selected piece can move
-		int turnColor = turn.equals(Colour.BLACK) && rotateScreen ? 0 : 7;
+		int turnColor = (turn.equals(Colour.BLACK) && rotateScreen) || (soloGame && (p1Colour == Colour.BLACK)) ? 0 : 7;
 		while (i < currMoveOptions.size()) {
 			moveOptions.add(new JLabel(new ImageIcon(ChessGui.class.getResource("images/MoveMarker.png"))));
 			moveOptions.get(i).setBounds(
@@ -426,25 +494,33 @@ public class ChessGui extends JFrame {
 	 * not result in the king being threatened. Removes all moves that do this from
 	 * being legal moves.
 	 */
-	private void verifyMoveOptions(ArrayList<Coordinate> moveOps) {
+	public void verifyMoveOptions(Piece currPiece, ArrayList<Coordinate> moveOps) {
 		// gets the current piece's location and prepares to emulate moves
-		Coordinate oldCoor = pieceHolder.getLocation();
+		Coordinate oldCoor = currPiece.getLocation();
 		ArrayList<Coordinate> coorsToRemove = new ArrayList<Coordinate>();
 		Piece oldPiece;
 		// tests each move to see if it results in a threatened king, then
 		// removes each move that results in such
 		for (Coordinate moveOption : moveOps) {
 			// emulates the piece moving to each move option
-			oldPiece = emulateMove(moveOption);
+			oldPiece = emulateMove(currPiece, moveOption);
 			// removes the move option from the list of current move options
 			if (isCoorThreatened(getCurrKing().getLocation())) {
 				coorsToRemove.add(moveOption);
 			}
 
-			unemulateMove(oldPiece, oldCoor);
+			unemulateMove(oldPiece, currPiece, oldCoor);
 		}
 
 		moveOps.removeAll(coorsToRemove);
+	}
+	
+	/**
+	 * Orders the current AI to move a piece
+	 */
+	public void moveAIPiece() {
+		ai.makeMove();
+		pieceHolder = null;
 	}
 
 	/**
@@ -453,7 +529,7 @@ public class ChessGui extends JFrame {
 	 * @param newCoor The coordinate to be moved to when emulating
 	 * @return The piece that may have been removed during the emulation
 	 */
-	private Piece emulateMove(Coordinate newCoor) {
+	private Piece emulateMove(Piece currPiece, Coordinate newCoor) {
 		// sets a piece's new location to the newCoor passed in
 		newCoor = new Coordinate(newCoor.getX(), newCoor.getY());
 
@@ -461,9 +537,9 @@ public class ChessGui extends JFrame {
 		Piece oldPiece = map.get(newCoor);
 		pieces.remove(oldPiece);
 		// maps the new location to the current piece
-		map.remove(pieceHolder.getLocation());
-		map.put(newCoor, pieceHolder);
-		pieceHolder.setLocation(newCoor);
+		map.remove(currPiece.getLocation());
+		map.put(newCoor, currPiece);
+		currPiece.setLocation(newCoor);
 		return oldPiece;
 	}
 
@@ -474,13 +550,13 @@ public class ChessGui extends JFrame {
 	 *                 to
 	 * @param oldCoor  The original location of the currently selected piece
 	 */
-	private void unemulateMove(Piece oldPiece, Coordinate oldCoor) {
+	private void unemulateMove(Piece oldPiece, Piece currPiece, Coordinate oldCoor) {
 		// sets the piece to its old coordinate and returns the potentially
 		// captured piece to its original position
 		oldCoor = new Coordinate(oldCoor.getX(), oldCoor.getY());
-		map.put(pieceHolder.getLocation(), oldPiece);
-		map.put(oldCoor, pieceHolder);
-		pieceHolder.setLocation(oldCoor);
+		map.put(currPiece.getLocation(), oldPiece);
+		map.put(oldCoor, currPiece);
+		currPiece.setLocation(oldCoor);
 		if (oldPiece != null)
 			pieces.add(oldPiece);
 	}
@@ -679,14 +755,16 @@ public class ChessGui extends JFrame {
 			if (el.getColour().equals(turn)) {
 				pieceHolder = el;
 				ArrayList<Coordinate> testOptions = pieceHolder.canMove();
-				verifyMoveOptions(testOptions);
 				if (testOptions.size() != 0) {
 					pieceHolder = oldHolder;
 					return;
 				}
 			}
 		}
-
+		
+		// Gets rid of move options for a clean-looking ending screen
+		clearMoveOptions();
+		
 		Colour winner;
 		if (turn == Colour.WHITE) {
 			winner = Colour.BLACK;
@@ -755,7 +833,7 @@ public class ChessGui extends JFrame {
 		} else {
 			turnLabel.setText("<html>" + turn.toString() + "'s<br>Turn</html>");
 		}
-		if(rotateScreen) {
+		if (rotateScreen) {
 			rotateScreen();
 		}
 	}
@@ -813,4 +891,8 @@ public class ChessGui extends JFrame {
 						+ "<br> Knights: " + piecesRemaining[color][1] + "<br> Bishops: " + piecesRemaining[color][2]
 						+ "<br> Rooks: " + piecesRemaining[color][3] + "<br> Queens: " + piecesRemaining[color][4]);
 	}
+}
+
+class CloseGameException extends Exception {
+	private static final long serialVersionUID = 1L;
 }

@@ -60,6 +60,7 @@ public class Pawn extends Piece {
 		if(colorNum == -1 && location.getY() == 6 && !isMoveBlocked(0, 2 * colorNum) && !isMoveBlocked(0, 1 * colorNum))
 			coors.add(new Coordinate(location.getX(), location.getY() + 2 * colorNum));
 		
+		engine.verifyMoveOptions(this, coors);
 		return coors;
 	}
 	
